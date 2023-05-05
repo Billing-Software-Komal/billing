@@ -1,6 +1,6 @@
 <?php
 include('adminsession.php');
- $page_title = 'Category';
+ $page_title = 'Brand';
 
 include('inc/head.php');
 
@@ -18,42 +18,47 @@ if($_GET['action']==3){
 $msg = "Data Has been Deleted Successfully";
 }
 
-if(isset($_GET['cat_id'])){
-  $keyvalue = $_GET['cat_id'];
+if(isset($_GET['brand_id'])){
+  $keyvalue = $_GET['brand_id'];
 }else{
   $keyvalue = 0;
 }
 
 if(isset($_POST['submit']))
 {
-  $cat_name = $_POST['cat_name'];
+  $brand_name = $_POST['brand_name'];
+  $sub_cat_id = $_POST['sub_cat_id'];
     
   if($keyvalue==0)
   {
-      mysqli_query($conn,"INSERT INTO category SET cat_name='$cat_name',createdate='$createdate',ipaddress='$ipaddress',loginid='$loginid'");
+      mysqli_query($conn,"INSERT INTO brand SET brand_name='$brand_name',sub_cat_id='$sub_cat_id',createdate='$createdate',ipaddress='$ipaddress',loginid='$loginid'");
       $action =1;
   }else
   {
-        mysqli_query($conn,"UPDATE category SET cat_name='$cat_name',createdate='$createdate',ipaddress='$ipaddress',loginid='$loginid' WHERE cat_id='$keyvalue'");
+        mysqli_query($conn,"UPDATE brand SET brand_name='$brand_name',sub_cat_id='$sub_cat_id',createdate='$createdate',ipaddress='$ipaddress',loginid='$loginid' WHERE brand_id='$keyvalue'");
       $action = 2;
   }
-  echo "<script>location='category?action=$action';</script>";
+  echo "<script>location='brand?action=$action';</script>";
 }
-if($_GET['dcat_id']!=''){
+if($_GET['dbrand_id']!=''){
    
-    mysqli_query($conn,"DELETE  FROM category WHERE cat_id='$_GET[dcat_id]'");
+    mysqli_query($conn,"DELETE  FROM brand WHERE brand_id='$_GET[dbrand_id]'");
     $action = 3;
-    echo "<script>location='category?action=$action';</script>";
+    echo "<script>location='brand?action=$action';</script>";
   }
-if($_GET['cat_id']!=''){
+if($_GET['brand_id']!=''){
     $btn_name ='Update';
     $btn_color = 'success';
-    $sql = mysqli_query($conn,"SELECT * FROM category WHERE cat_id='$_GET[cat_id]'");
+    $sql = mysqli_query($conn,"SELECT * FROM brand WHERE brand_id='$_GET[brand_id]'");
     $rowedit = mysqli_fetch_array($sql);
-    $cat_name = $rowedit['cat_name'];
+    $brand_name = $rowedit['brand_name'];
+    $sub_cat_id = $rowedit['sub_cat_id'];
+
    
   }else{
-    $cat_name = '';
+    $brand_name = '';
+    $sub_cat_id = '';
+
   }
 ?>
 
@@ -71,11 +76,11 @@ include('inc/menu.php');
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Categoty</h1>
+      <h1>Brand</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="dashboard">Home</a></li>
-          <li class="breadcrumb-item ">Categoty</li>
+          <li class="breadcrumb-item ">Brand</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -89,14 +94,26 @@ include('inc/menu.php');
                <div class="card">
                   <div class="card-body">
                      <h5 class="class card-title">
-                        Add Category
+                        Add Brand
                      </h5>
                      <form action="" method='POST' enctype="multipart/form-data">
                         <div class="row md-3">
-                            <input type="hidden" name='cat_id' value="<?php echo $keyvalue;?>" >
-                            <h4 class="card-title ml-2">Category Name</h4>
+                            <input type="hidden" name='brand_id' value="<?php echo $keyvalue;?>" >
+                            <h4 class="card-title ml-2">Sub Category Name</h4>
                             <div class="col-sm-10">
-                                <input type="text" name="cat_name" Placeholder="Name" class="form-control" value="<?php echo $cat_name; ?>">
+                                <select name="sub_cat_id" id="sub_cat_id" class="form-control select2">
+                                  <Option value="">Select Sub Category</Option>
+                                  <?php 
+                                  $sql = mysqli_query($conn,"SELECT * FROM sub_category order by sub_cat_id desc");
+                                  while($row = mysqli_fetch_array($sql)){ ?>
+                                  <option value="<?php echo $row['sub_cat_id'];?>"><?php echo $row['sub_cat_name']; ?></option>
+                                  <?php } ?>
+                                </select>
+                                <script>document.getElementById('sub_cat_id').value = '<?php echo $sub_cat_id; ?>'; </script>
+                            </div>
+                            <h4 class="card-title ml-2">Brand Name</h4>
+                            <div class="col-sm-10">
+                                <input type="text" name="brand_name" Placeholder="Name" class="form-control" value="<?php echo $brand_name; ?>">
                             </div>
                            
                         </div>
@@ -110,7 +127,7 @@ include('inc/menu.php');
                <div class="card">
                   <div class="card-body">
                      <h5 class="class card-title">
-                        Show Category
+                        Show Brand
                      </h5>
                     <table class="table datatable">
                         <thead>
@@ -119,7 +136,10 @@ include('inc/menu.php');
                                 S.No.
                                 </th>
                                 <th scope="col">
-                                     Name
+                                    Sub Category Name
+                                </th>
+                                <th scope="col">
+                                    Brand Name
                                 </th>
                                 <th scope="col">
                                     Action
@@ -129,16 +149,17 @@ include('inc/menu.php');
                             <tbody>
                                 <?php
                                 $sn=1;
-                                $sql = mysqli_query($conn,"SELECT * FROM category order by cat_id desc");
+                                $sql = mysqli_query($conn,"SELECT * FROM brand left join sub_category on brand.sub_cat_id = sub_category.sub_cat_id order by brand_id desc");
                                 while($row = mysqli_fetch_array($sql)){
                                 ?>
                                 <tr>
                                     <td><?php echo $sn++;?></td>
-                                    <td><?php echo $row['cat_name'];?></td>
+                                    <td><?php echo ucwords($row['sub_cat_name']);?></td>
+                                    <td><?php echo ucwords($row['brand_name']);?></td>
                                     
                                     <td>
-                                    <a  href="category?cat_id=<?php echo $row['cat_id']; ?>"  class="btn btn-success editbtn">Edit</a>
-                                    <a href="category?dcat_id=<?php echo $row['cat_id']; ?>"  class="btn btn-danger">Delete</a>
+                                    <a  href="brand?brand_id=<?php echo $row['brand_id']; ?>"  class="btn btn-success editbtn">Edit</a>
+                                    <a href="brand?dbrand_id=<?php echo $row['brand_id']; ?>"  class="btn btn-danger">Delete</a>
                                     </td>
                                 </tr>
                                 <?php }?>
@@ -150,7 +171,6 @@ include('inc/menu.php');
          </div>
       </section>
   </main><!-- End #main -->
-
   <!-- ======= Footer ======= -->
  <?php
 include('inc/footer.php');
