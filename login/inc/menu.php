@@ -12,6 +12,18 @@
          <span>Category</span>
          </a>
       </li>
+      <li class="nav-item">
+         <a class="nav-link " href="sub-category">
+         <i class="bi bi-grid"></i>
+         <span>Sub Category</span>
+         </a>
+      </li>
+      <li class="nav-item">
+         <a class="nav-link " href="brand">
+         <i class="bi bi-grid"></i>
+         <span>Brand</span>
+         </a>
+      </li>
      
    </ul>
 </aside>
